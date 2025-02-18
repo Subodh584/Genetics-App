@@ -11,111 +11,51 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
-  const [mode, setMode] = useState("initial"); // initial, camera, upload, processing, result
+  const [mode, setMode] = useState("initial");
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [stream, setStream] = useState(null);
 
-
-  useEffect(() => {
-  // Request camera permissions on component mount
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => stream.getTracks().forEach(track => track.stop()))
-    .catch(err => console.error("Initial permission check failed:", err));
-
-  // Cleanup function
-  return () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+  // Simplified camera start function
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play(); // Explicitly play the video
+      }
+      setMode("camera");
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      setError("Failed to access camera");
     }
-    if (videoRef.current) {
+  };
+
+  // Simplified stop camera function
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
   };
-}, []);
 
-
-  useEffect(() => {
-    return () => {
-      if (stream) {
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => {
-          track.stop();
-          console.log(`Track ${track.kind} stopped`);
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-        setStream(null);
-      }
-    };
-  }, [stream]);
-
-  const startCamera = async () => {
-    try {
-      // Reset any existing streams
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-
-      console.log("Requesting camera access...");
-      const cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 640 }, // Reduced for better performance
-          height: { ideal: 480 },
-        },
-        audio: false,
-      });
-
-      console.log("Camera access granted!");
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = cameraStream;
-        videoRef.current
-          .play()
-          .then(() => console.log("Video playing"))
-          .catch((e) => console.error("Video play error:", e));
-      }
-
-      setStream(cameraStream);
-      setMode("camera");
-    } catch (err) {
-      console.error("Camera error:", err);
-      setError(`Camera error: ${err.message}`);
-    }
-  };
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
-    }
-  };
-
+  // Simplified capture function
   const capturePhoto = () => {
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-
-    if (canvas && video) {
-      const context = canvas.getContext("2d");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      canvas.toBlob(
-        (blob) => {
-          setImage(blob);
-          stopCamera();
-          setMode("preview");
-        },
-        "image/jpeg",
-        0.95
-      );
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext("2d");
+      canvasRef.current.width = videoRef.current.videoWidth;
+      canvasRef.current.height = videoRef.current.videoHeight;
+      context.drawImage(videoRef.current, 0, 0);
+      
+      canvasRef.current.toBlob((blob) => {
+        setImage(blob);
+        stopCamera();
+        setMode("preview");
+      }, "image/jpeg", 0.95);
     }
   };
 
@@ -159,6 +99,7 @@ export default function Home() {
   };
 
   const resetApp = () => {
+    stopCamera();
     setImage(null);
     setResult(null);
     setError(null);
@@ -168,6 +109,12 @@ export default function Home() {
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   return (
     <div className="app-container">
@@ -230,7 +177,7 @@ export default function Home() {
                 autoPlay
                 playsInline
                 muted
-                className="camera-preview"
+                className="w-full max-w-md border border-gray-300"
               />
               <canvas ref={canvasRef} style={{ display: "none" }} />
 
@@ -241,10 +188,7 @@ export default function Home() {
 
                 <button
                   className="back-btn"
-                  onClick={() => {
-                    stopCamera();
-                    resetApp();
-                  }}
+                  onClick={resetApp}
                 >
                   Back
                 </button>
@@ -252,6 +196,8 @@ export default function Home() {
             </div>
           )}
 
+          {/* Rest of your UI components remain the same */}
+          {/* Preview, Processing, and Result sections... */}
           {mode === "preview" && (
             <motion.div
               key="preview"
