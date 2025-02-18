@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useRef } from "react";
 import {
   Camera,
   Upload,
@@ -9,55 +8,16 @@ import {
   Info,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Home() {
   const [mode, setMode] = useState("initial");
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
-
-  // Simplified camera start function
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play(); // Explicitly play the video
-      }
-      setMode("camera");
-    } catch (error) {
-      console.error("Error accessing camera:", error);
-      setError("Failed to access camera");
-    }
-  };
-
-  // Simplified stop camera function
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
-  };
-
-  // Simplified capture function
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext("2d");
-      canvasRef.current.width = videoRef.current.videoWidth;
-      canvasRef.current.height = videoRef.current.videoHeight;
-      context.drawImage(videoRef.current, 0, 0);
-      
-      canvasRef.current.toBlob((blob) => {
-        setImage(blob);
-        stopCamera();
-        setMode("preview");
-      }, "image/jpeg", 0.95);
-    }
-  };
+  const navigate = useNavigate();
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -99,7 +59,6 @@ export default function Home() {
   };
 
   const resetApp = () => {
-    stopCamera();
     setImage(null);
     setResult(null);
     setError(null);
@@ -110,12 +69,6 @@ export default function Home() {
     fileInputRef.current.click();
   };
 
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
   return (
     <div className="app-container">
       <header>
@@ -124,7 +77,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
         >
-          AI Photo Analyzer
+          Genetics Project
         </motion.h1>
       </header>
 
@@ -143,7 +96,7 @@ export default function Home() {
                 className="option-card"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={startCamera}
+                onClick={() => navigate("/test")}
               >
                 <Camera size={48} />
                 <h2>Take Photo</h2>
@@ -170,34 +123,6 @@ export default function Home() {
             </motion.div>
           )}
 
-          {mode === "camera" && (
-            <div className="camera-container">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full max-w-md border border-gray-300"
-              />
-              <canvas ref={canvasRef} style={{ display: "none" }} />
-
-              <div className="camera-controls">
-                <button className="capture-btn" onClick={capturePhoto}>
-                  <div className="capture-btn-inner"></div>
-                </button>
-
-                <button
-                  className="back-btn"
-                  onClick={resetApp}
-                >
-                  Back
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Rest of your UI components remain the same */}
-          {/* Preview, Processing, and Result sections... */}
           {mode === "preview" && (
             <motion.div
               key="preview"
@@ -327,7 +252,7 @@ export default function Home() {
           transition={{ delay: 0.5 }}
         >
           <Info size={16} />
-          <p>AI Photo Analyzer © 2025</p>
+          <p>Genetics Project © 2025</p>
         </motion.div>
       </footer>
     </div>
