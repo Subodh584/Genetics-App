@@ -1,6 +1,7 @@
 {
   "short_name": "Genetics App",
   "name": "Our Genetics App",
+  "permissions":["camera"],
   "icons": [
     {
       "src": "favicon.ico",

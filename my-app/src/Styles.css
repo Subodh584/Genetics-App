@@ -111,46 +111,51 @@ main {
 }
 
 .camera-container {
-  width: 100%;
-  max-width: 500px;
-  aspect-ratio: 3/4;
-  overflow: hidden;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  background: black;
   position: relative;
+  width: 100%;
+  height: 100vh;
+  max-height: 80vh;
+  background: #000;
+  overflow: hidden;
+}
+
+.camera-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .camera-controls {
-  position: absolute;
-  bottom: 1.5rem;
+  position: fixed;
+  bottom: 20px;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
-  gap: 1rem;
   align-items: center;
+  gap: 20px;
+  padding: 20px;
+  z-index: 10;
 }
 
 .capture-btn {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  background: white;
   border: none;
-  box-shadow: 0 0 0 2px white;
+  padding: 3px;
+  cursor: pointer;
 }
 
 .capture-btn-inner {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  background: white;
-  transition: all 0.2s ease;
+  border: 3px solid #4f46e5;
 }
 
 .capture-btn:active .capture-btn-inner {
@@ -159,14 +164,11 @@ main {
 }
 
 .back-btn {
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  padding: 10px 20px;
+  background: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-size: 0.9rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .preview-container {
@@ -461,6 +463,14 @@ footer div {
 
 
 /* Add these styles to your existing CSS */
+
+video {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    background-color: black; /* Ensures visibility */
+  }
+  
 
 .camera-video {
     width: 100%;
